@@ -10,4 +10,9 @@ export class GeminiService {
   async basicPrompt(dto: BasicPromptDto) {
     return basicPromptUseCase(this.ai, dto);
   }
+
+  async basicPromptStream(dto: BasicPromptDto) {
+    // return basicPromptUseCase(this.ai, dto);
+    return 'Hola mundo como Stream';
+  }
 }
