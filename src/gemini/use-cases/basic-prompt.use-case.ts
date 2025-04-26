@@ -10,10 +10,10 @@ export const basicPromptUseCase = async (
   basicPromptDto: BasicPromptDto,
   options?: Options,
 ) => {
-  const { model = 'gemini-2.0-flash' } = options;
+  const { model = 'gemini-2.0-flash' } = options ?? {};
 
   const response = await ai.models.generateContent({
-    model,
+    model: model,
     contents: basicPromptDto.prompt,
     config: {
       systemInstruction: 'Responde únicamente en español, en formato makrdown',
