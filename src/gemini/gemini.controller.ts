@@ -1,6 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import { GeminiService } from './gemini.service';
 import { BasicPromptDto } from './dtos/basic-prompt.dto';
+import type { Response } from 'express';
 
 @Controller('gemini')
 export class GeminiController {
@@ -12,7 +13,20 @@ export class GeminiController {
   }
 
   @Post('basic-prompt-stream')
-  basicPromptStream(@Body() dto: BasicPromptDto) {
-    return this.geminiService.basicPromptStream(dto);
+  async basicPromptStream(
+    @Body() dto: BasicPromptDto,
+    @Res() response: Response,
+  ) {
+    const stream = await this.geminiService.basicPromptStream(dto);
+
+    response.setHeader('Content-Type', 'text/plain');
+    response.status(HttpStatus.OK);
+
+    for await (const chunk of stream) {
+      const piece = chunk.text;
+      response.write(piece);
+    }
+
+    response.end();
   }
 }

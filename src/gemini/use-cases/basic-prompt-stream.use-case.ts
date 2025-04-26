@@ -6,7 +6,7 @@ interface Options {
   systemInstruction?: string;
 }
 
-export const basicPromptUseCase = async (
+export const basicPromptStreamUseCase = async (
   ai: GoogleGenAI,
   basicPromptDto: BasicPromptDto,
   options?: Options,
@@ -21,7 +21,7 @@ export const basicPromptUseCase = async (
     `,
   } = options ?? {};
 
-  const response = await ai.models.generateContent({
+  const response = await ai.models.generateContentStream({
     model: model,
     contents: basicPromptDto.prompt,
     config: {
@@ -29,5 +29,5 @@ export const basicPromptUseCase = async (
     },
   });
 
-  return response.text;
+  return response;
 };

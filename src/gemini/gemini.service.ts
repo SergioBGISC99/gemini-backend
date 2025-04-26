@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BasicPromptDto } from './dtos/basic-prompt.dto';
 import { GoogleGenAI } from '@google/genai';
 import { basicPromptUseCase } from './use-cases/basic-prompt.use-case';
+import { basicPromptStreamUseCase } from './use-cases/basic-prompt-stream.use-case';
 
 @Injectable()
 export class GeminiService {
@@ -12,7 +13,6 @@ export class GeminiService {
   }
 
   async basicPromptStream(dto: BasicPromptDto) {
-    // return basicPromptUseCase(this.ai, dto);
-    return 'Hola mundo como Stream';
+    return basicPromptStreamUseCase(this.ai, dto);
   }
 }
