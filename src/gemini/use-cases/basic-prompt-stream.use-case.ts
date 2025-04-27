@@ -21,6 +21,9 @@ export const basicPromptStreamUseCase = async (
     `,
   } = options ?? {};
 
+
+  const files = basicPromptDto.files;
+
   const response = await ai.models.generateContentStream({
     model: model,
     contents: basicPromptDto.prompt,
