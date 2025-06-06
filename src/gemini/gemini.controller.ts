@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Post,
   Res,
   UploadedFiles,
@@ -11,10 +14,31 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
 import { BasicPromptDto } from './dtos/basic-prompt.dto';
 import { GeminiService } from './gemini.service';
+import { ChatPromptDto } from './dtos/chat-promt.dto';
+import { GenerateContentResponse } from '@google/genai';
 
 @Controller('gemini')
 export class GeminiController {
   constructor(private readonly geminiService: GeminiService) {}
+
+  async outputStreamResponse(
+    response: Response,
+    stream: AsyncGenerator<GenerateContentResponse, any, any>,
+  ) {
+    response.setHeader('Content-Type', 'text/plain');
+    response.status(HttpStatus.OK);
+
+    let resultText = '';
+
+    for await (const chunk of stream) {
+      const piece = chunk.text;
+      resultText += piece;
+      response.write(piece);
+    }
+
+    response.end();
+    return resultText;
+  }
 
   @Post('basic-prompt')
   basicPrompt(@Body() dto: BasicPromptDto) {
@@ -32,14 +56,40 @@ export class GeminiController {
 
     const stream = await this.geminiService.basicPromptStream(dto);
 
-    response.setHeader('Content-Type', 'text/plain');
-    response.status(HttpStatus.OK);
+    this.outputStreamResponse(response, stream);
+  }
 
-    for await (const chunk of stream) {
-      const piece = chunk.text;
-      response.write(piece);
-    }
+  @Post('chat-stream')
+  @UseInterceptors(FilesInterceptor('files'))
+  async chatStream(
+    @Body() chatPromptDto: ChatPromptDto,
+    @Res() response: Response,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    chatPromptDto.files = files;
 
-    response.end();
+    const stream = await this.geminiService.chatStream(chatPromptDto);
+    const data = await this.outputStreamResponse(response, stream);
+
+    const geminiMessage = {
+      role: 'model',
+      parts: [{ text: data }],
+    };
+
+    const userMessage = {
+      role: 'user',
+      parts: [{ text: chatPromptDto.prompt }],
+    };
+
+    this.geminiService.saveMessage(chatPromptDto.chatId, userMessage);
+    this.geminiService.saveMessage(chatPromptDto.chatId, geminiMessage);
+  }
+
+  @Get('chat-history/:chatId')
+  getChatHistory(@Param('chatId', ParseUUIDPipe) chatId: string) {
+    return this.geminiService.getChatHistory(chatId).map((message) => ({
+      role: message.role,
+      parts: message.parts.map((part) => part.text).join(''),
+    }));
   }
 }
