@@ -18,6 +18,7 @@ import { ChatPromptDto } from './dtos/chat-promt.dto';
 import { GenerateContentResponse } from '@google/genai';
 import { ImageGenerationDto } from './dtos/image-generation.dto';
 import { PokemonHelperDto } from './dtos/pokemon-helper.dto';
+import { TriviaQuestionDto } from './dtos/trivia-question.dto';
 
 @Controller('gemini')
 export class GeminiController {
@@ -114,5 +115,11 @@ export class GeminiController {
   @Post('pokemon-helper')
   getPokemonHelp(@Body() dto: PokemonHelperDto) {
     return this.geminiService.getPokemonHelp(dto);
+  }
+
+  @Get('question/:topic')
+  getTriviaQuestion(@Param('topic') topic: string) {
+    const dto: TriviaQuestionDto = { topic };
+    return this.geminiService.getTriviaQuestion(dto);
   }
 }
