@@ -38,7 +38,9 @@ export const imageGenerationUseCase = async (
   const { files = [], prompt } = imageGenerationDto;
   const contents: ContentListUnion = [{ text: prompt }];
 
-  const uploadedFiles = await geminiUploadFiles(ai, files);
+  const uploadedFiles = await geminiUploadFiles(ai, files, {
+    transformToPng: true,
+  });
 
   uploadedFiles.forEach((file) => {
     contents.push(createPartFromUri(file.uri ?? '', file.mimeType ?? ''));
@@ -53,8 +55,6 @@ export const imageGenerationUseCase = async (
       responseModalities: [Modality.TEXT, Modality.IMAGE],
     },
   });
-
-  console.log(response);
 
   let imageUrl = '';
   let text = '';
