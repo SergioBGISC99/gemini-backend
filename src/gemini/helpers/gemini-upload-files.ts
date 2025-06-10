@@ -33,7 +33,7 @@ export const geminiUploadFiles = async (
         const buffer = await sharp(file.buffer).png().toBuffer();
 
         return ai.files.upload({
-          file: new Blob([buffer], { type: 'image/ong' }),
+          file: new Blob([buffer], { type: 'image/png' }),
         });
       }),
     );
