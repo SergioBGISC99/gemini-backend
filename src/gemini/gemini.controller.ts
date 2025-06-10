@@ -17,6 +17,7 @@ import { GeminiService } from './gemini.service';
 import { ChatPromptDto } from './dtos/chat-promt.dto';
 import { GenerateContentResponse } from '@google/genai';
 import { ImageGenerationDto } from './dtos/image-generation.dto';
+import { PokemonHelperDto } from './dtos/pokemon-helper.dto';
 
 @Controller('gemini')
 export class GeminiController {
@@ -108,5 +109,10 @@ export class GeminiController {
       imageUrl,
       text,
     };
+  }
+
+  @Post('pokemon-helper')
+  getPokemonHelp(@Body() dto: PokemonHelperDto) {
+    return this.geminiService.getPokemonHelp(dto);
   }
 }
