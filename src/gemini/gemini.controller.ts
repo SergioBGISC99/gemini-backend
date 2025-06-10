@@ -16,6 +16,7 @@ import { BasicPromptDto } from './dtos/basic-prompt.dto';
 import { GeminiService } from './gemini.service';
 import { ChatPromptDto } from './dtos/chat-promt.dto';
 import { GenerateContentResponse } from '@google/genai';
+import { ImageGenerationDto } from './dtos/image-generation.dto';
 
 @Controller('gemini')
 export class GeminiController {
@@ -91,5 +92,21 @@ export class GeminiController {
       role: message.role,
       parts: message.parts.map((part) => part.text).join(''),
     }));
+  }
+
+  @Post('image-generation')
+  @UseInterceptors(FilesInterceptor('files'))
+  async imageGeneration(
+    @Body() dto: ImageGenerationDto,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    dto.files = files;
+
+    const { imageUrl, text } = await this.geminiService.imageGeneration(dto);
+
+    return {
+      imageUrl,
+      text,
+    };
   }
 }
